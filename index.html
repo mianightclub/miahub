@@ -108,8 +108,68 @@
         }
 
         header { background-color: var(--card-bg); padding: 15px 15px 5px 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        h1 { margin: 0; font-size: 1.4rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;}
+        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 8px; flex-wrap: wrap; }
+        .title-role-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        h1 { margin: 0; font-size: 1.3rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+        
+        /* Role Switcher */
+        .role-switcher {
+            display: inline-flex;
+            background: var(--input-bg);
+            padding: 3px;
+            border-radius: 20px;
+            gap: 2px;
+        }
+        .role-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 5px 11px;
+            border-radius: 16px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .role-btn.active {
+            background: var(--accent);
+            color: var(--text-on-accent);
+            box-shadow: 0 2px 6px rgba(0,122,255,0.35);
+        }
+
+        /* Barkeeper Mode Sub-Tabs */
+        .bk-mode-tabs {
+            display: flex;
+            gap: 6px;
+            padding-bottom: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .bk-mode-tabs::-webkit-scrollbar { display: none; }
+        .bk-mode-btn {
+            flex: 1;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .bk-mode-btn.active {
+            background: var(--accent);
+            color: var(--text-on-accent);
+            box-shadow: 0 0 10px rgba(0,122,255,0.4);
+        }
+
         .scroll-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; align-items: center; }
         .scroll-row::-webkit-scrollbar { display: none; }
         
@@ -296,6 +356,228 @@
         [dir="rtl"] .lang-menu div { text-align: right; }
         .lang-menu div:hover, .lang-menu div:active { background: var(--input-bg); }
         .lang-menu div.active { color: var(--accent); font-weight: bold; }
+
+        /* --- BARKEEPER REZEPTE (SWIPE) & LERNMODUS --- */
+        .bk-section {
+            padding: 12px 15px 40px 15px;
+        }
+        .swipe-carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 15px;
+            padding: 10px 0 20px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .swipe-carousel::-webkit-scrollbar { display: none; }
+        .recipe-swipe-card {
+            flex: 0 0 88%;
+            max-width: 400px;
+            scroll-snap-align: center;
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 22px 20px;
+            box-shadow: var(--shadow);
+            border-top: 6px solid var(--accent);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 290px;
+        }
+        .recipe-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .alkoholfrei-badge {
+            display: inline-block;
+            background: rgba(52, 199, 89, 0.18);
+            color: var(--success);
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin: 4px auto 12px auto;
+        }
+        .ingredient-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+        .ingredient-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: var(--input-bg);
+            border-radius: 10px;
+            font-size: 1.02rem;
+            font-weight: 600;
+        }
+        .ing-num {
+            background: var(--accent);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        /* LERNMODUS STYLES */
+        .learn-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .learn-stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            background: var(--input-bg);
+            padding: 8px 12px;
+            border-radius: 10px;
+        }
+        .countdown-bar-wrap {
+            width: 100%;
+            height: 6px;
+            background: var(--input-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0 16px 0;
+        }
+        .countdown-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.1s linear;
+        }
+        .peek-zone {
+            border-radius: 12px;
+            padding: 12px;
+            background: var(--input-bg);
+            margin-bottom: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .blurred-solution {
+            filter: blur(11px);
+            opacity: 0.45;
+            transition: filter 0.15s ease, opacity 0.15s ease;
+            pointer-events: none;
+        }
+        .peek-active .blurred-solution {
+            filter: blur(0);
+            opacity: 1;
+        }
+        .peek-hint-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.72);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            pointer-events: none;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .learn-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .learn-input {
+            flex: 1;
+            background: var(--input-bg);
+            border: 2px solid transparent;
+            color: var(--text-primary);
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .learn-input:focus {
+            border-color: var(--accent);
+        }
+        .learn-input.input-correct {
+            border-color: var(--success);
+            background: rgba(52, 199, 89, 0.12);
+        }
+        .learn-input.input-wrong {
+            border-color: var(--danger);
+            background: rgba(255, 59, 48, 0.12);
+        }
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        @media (max-width: 420px) {
+            .compare-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .compare-box {
+            background: var(--input-bg);
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .compare-box h4 {
+            margin: 0 0 8px 0;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+        .action-btn-primary {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .action-btn-secondary {
+            background: var(--input-bg);
+            color: var(--text-primary);
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body :class="{ 'focus-mode-active': focusMode }">
@@ -304,7 +586,17 @@
     <div class="top-section-wrapper">
         <header>
             <div class="top-row">
-                <h1>{{ t.title }}</h1>
+                <div class="title-role-group">
+                    <h1>{{ t.title }}</h1>
+                    <div class="role-switcher">
+                        <button class="role-btn" :class="{ active: role === 'assistant' }" @click="setRole('assistant')">
+                            <i class="fas fa-boxes-stacked"></i> {{ t.assistant }}
+                        </button>
+                        <button class="role-btn" :class="{ active: role === 'barkeeper' }" @click="setRole('barkeeper')">
+                            <i class="fas fa-martini-glass-citrus"></i> {{ t.barkeeper }}
+                        </button>
+                    </div>
+                </div>
                 <div style="display:flex; gap: 5px; align-items: center;">
                     <button class="header-icon-btn" @click="enterClipboardFocus"><i class="fas fa-clipboard-check"></i></button>
                     <button class="header-icon-btn" :class="{ 'focus-active-icon': focusMode }" @click="enterFocusMode"><i class="fas" :class="focusMode ? 'fa-eye-slash' : 'fa-eye'"></i></button>
@@ -320,28 +612,48 @@
                     </div>
                 </div>
             </div>
-            <div class="scroll-row">
-                <button v-for="(bar, index) in bars" :key="bar.id" class="tab-btn" :class="{ active: activeBarIndex === index }" @click="switchBar(index)">{{ bar.name }}</button>
+
+            <!-- BARKEEPER SUB-NAVIGATION -->
+            <div v-if="role === 'barkeeper'" class="bk-mode-tabs">
+                <button class="bk-mode-btn" :class="{ active: barkeeperTab === 'stock' }" @click="barkeeperTab = 'stock'">
+                    <i class="fas fa-wine-bottle"></i> {{ t.bkStockTab }}
+                </button>
+                <button class="bk-mode-btn" :class="{ active: barkeeperTab === 'recipes' }" @click="barkeeperTab = 'recipes'">
+                    <i class="fas fa-book-open"></i> {{ t.bkRecipesTab }}
+                </button>
+                <button class="bk-mode-btn" :class="{ active: barkeeperTab === 'learn' }" @click="startLearnMode">
+                    <i class="fas fa-graduation-cap"></i> {{ t.bkLearnTab }}
+                </button>
+            </div>
+
+            <!-- BAR SELECTION ROW (Shown in Assistant Mode AND in Barkeeper Stock Mode) -->
+            <div class="scroll-row" v-if="role === 'assistant' || (role === 'barkeeper' && barkeeperTab === 'stock')">
+                <button v-for="(bar, index) in activeBarsList" :key="bar.id" class="tab-btn" :class="{ active: currentBarIndex === index }" @click="switchBar(index)">{{ bar.name }}</button>
                 <button class="manage-btn" @click="openBarModal"><i class="fas fa-pen"></i></button>
             </div>
         </header>
-        <div class="filter-bar" style="background: var(--bg-color); padding: 10px 15px;">
+
+        <!-- CATEGORY FILTER BAR (Shown in Assistant Mode AND in Barkeeper Stock Mode) -->
+        <div v-if="role === 'assistant' || (role === 'barkeeper' && barkeeperTab === 'stock')" class="filter-bar" style="background: var(--bg-color); padding: 10px 15px;">
             <div class="scroll-row">
                 <button class="manage-btn" :class="{ 'active-sort': sortMode }" @click="toggleSortMode" style="margin-right: 8px;">
                     <i class="fas fa-sort"></i>
                 </button>
                 <button class="manage-btn" @click="openCatModal" style="margin-right: 8px;"><i class="fas fa-pen"></i></button>
                 
-                <button v-for="cat in categories" :key="cat" class="tab-btn" style="background: var(--card-bg);" :class="{ active: currentCategory === cat }" @click="currentCategory = cat">
+                <button v-for="cat in activeCategoriesList" :key="cat" class="tab-btn" style="background: var(--card-bg);" :class="{ active: activeCategory === cat }" @click="setActiveCategory(cat)">
                     {{ cat === 'Alle' ? t.all : cat }}
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="item-list">
+    <!-- ========================================================= -->
+    <!-- STOCK ITEM LIST (ASSISTANT OR BARKEEPER SPIRIT STOCK)      -->
+    <!-- ========================================================= -->
+    <div class="item-list" v-if="role === 'assistant' || (role === 'barkeeper' && barkeeperTab === 'stock')">
         <template v-for="(groupItems, groupName) in displayedGroups" :key="'main-'+groupName">
-            <div v-if="currentCategory === 'Alle' && groupItems.length > 0" class="group-header">
+            <div v-if="activeCategory === 'Alle' && groupItems.length > 0" class="group-header">
                 {{ groupName === 'Alle' ? t.all : (groupName === 'Sonstiges' ? t.other : groupName) }}
             </div>
             
@@ -403,19 +715,157 @@
         </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- BARKEEPER TAB 2: REZEPTE NACHSCHAUEN (HORIZONTAL SWIPE)   -->
+    <!-- ========================================================= -->
+    <div v-if="role === 'barkeeper' && barkeeperTab === 'recipes'" class="bk-section">
+        <div style="margin-bottom: 10px;">
+            <input type="text" v-model="recipeSearch" :placeholder="t.searchDrink" class="input-clean" style="width: 100%; box-sizing: border-box;">
+        </div>
+
+        <div class="scroll-row" style="padding-bottom: 6px;">
+            <button v-for="(drink, idx) in filteredRecipes" :key="drink.id" class="tab-btn" :class="{ active: activeRecipeIdx === idx }" @click="scrollToRecipe(idx)">
+                {{ drink.name }}
+            </button>
+        </div>
+
+        <div class="swipe-carousel" ref="recipeCarousel" @scroll.passive="onCarouselScroll">
+            <div v-for="(drink, idx) in filteredRecipes" :key="drink.id" class="recipe-swipe-card" :style="{ borderTopColor: drink.color }">
+                <div>
+                    <div style="text-align:center;">
+                        <div class="recipe-title">{{ drink.name }}</div>
+                        <div v-if="drink.alkoholfrei" class="alkoholfrei-badge">{{ t.alkoholfrei }}</div>
+                    </div>
+                    <ul class="ingredient-list">
+                        <li v-for="(ing, i) in drink.ingredients" :key="i">
+                            <span class="ing-num" :style="{ background: drink.color }">{{ i + 1 }}</span>
+                            <span>{{ ing }}</span>
+                        </li>
+                    </ul>
+                </div>
+                <div style="text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;">
+                    <i class="fas fa-arrows-left-right"></i> {{ idx + 1 }} / {{ filteredRecipes.length }} — {{ t.swipeHint }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- BARKEEPER TAB 3: INTERAKTIVER LERNMODUS                   -->
+    <!-- ========================================================= -->
+    <div v-if="role === 'barkeeper' && barkeeperTab === 'learn'" class="bk-section">
+        <div v-if="currentLearnCard" class="learn-card">
+            <div class="learn-stats-bar">
+                <span><i class="fas fa-layer-group"></i> {{ t.cardStat }}: <strong>✓ {{ getCardStat(currentLearnCard.id).correct }}</strong> | <strong>✗ {{ getCardStat(currentLearnCard.id).wrong }}</strong></span>
+                <button @click="resetLearnStats" style="background:transparent; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem;">
+                    <i class="fas fa-rotate-left"></i> {{ t.resetStats }}
+                </button>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 8px;">
+                <div class="recipe-title">{{ currentLearnCard.name }}</div>
+                <div v-if="currentLearnCard.alkoholfrei" class="alkoholfrei-badge">{{ t.alkoholfrei }}</div>
+            </div>
+
+            <!-- PHASE 1: 3 SEKUNDEN MERKEN -->
+            <template v-if="learnPhase === 'memorize'">
+                <div style="text-align: center; font-size: 0.9rem; color: var(--accent); font-weight: 700;">
+                    <i class="fas fa-stopwatch"></i> {{ t.memorizePrompt }} ({{ Math.ceil(memorizeTimeLeft / 1000) }}s)
+                </div>
+                <div class="countdown-bar-wrap">
+                    <div class="countdown-bar-fill" :style="{ width: (memorizeTimeLeft / 3000 * 100) + '%' }"></div>
+                </div>
+                <ul class="ingredient-list">
+                    <li v-for="(ing, i) in currentLearnCard.ingredients" :key="i">
+                        <span class="ing-num">{{ i + 1 }}</span>
+                        <span>{{ ing }}</span>
+                    </li>
+                </ul>
+                <button class="action-btn-primary" @click="skipMemorize">
+                    <i class="fas fa-keyboard"></i> {{ t.startTypingNow }}
+                </button>
+            </template>
+
+            <!-- PHASE 2: VERSCHWOMMEN & SELBER EINTRAGEN (+ GEDRÜCKT HALTEN ZUM SPICKEN) -->
+            <template v-else-if="learnPhase === 'input'">
+                <div class="peek-zone" :class="{ 'peek-active': isPeeking }"
+                     @mousedown="isPeeking = true" @mouseup="isPeeking = false" @mouseleave="isPeeking = false"
+                     @touchstart.passive="isPeeking = true" @touchend="isPeeking = false" @touchcancel="isPeeking = false">
+                    <div class="blurred-solution">
+                        <div v-for="(ing, i) in currentLearnCard.ingredients" :key="i" style="padding: 3px 0; font-size: 0.9rem; font-weight: 600;">
+                            {{ i + 1 }}. {{ ing }}
+                        </div>
+                    </div>
+                    <div v-if="!isPeeking" class="peek-hint-overlay">
+                        <i class="fas fa-hand-pointer"></i> {{ t.holdToPeek }}
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <div v-for="(ing, i) in currentLearnCard.ingredients" :key="i" class="learn-input-row">
+                        <span class="ing-num">{{ i + 1 }}</span>
+                        <input type="text" class="learn-input" v-model="userAnswers[i]" :placeholder="t.ingredientPlaceholder + ' ' + (i + 1)" @keyup.enter="i === currentLearnCard.ingredients.length - 1 ? checkLearnAnswers() : null">
+                    </div>
+                </div>
+
+                <button class="action-btn-primary" @click="checkLearnAnswers">
+                    <i class="fas fa-check-double"></i> {{ t.checkAnswers }}
+                </button>
+            </template>
+
+            <!-- PHASE 3: AUSWERTUNG & BEIDE SEITEN SICHTBAR -->
+            <template v-else-if="learnPhase === 'result'">
+                <div style="text-align: center; margin: 10px 0; font-weight: 800; font-size: 1.15rem;" :style="{ color: lastRoundAllCorrect ? 'var(--success)' : 'var(--danger)' }">
+                    <i class="fas" :class="lastRoundAllCorrect ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+                    {{ lastRoundAllCorrect ? t.perfectResult : t.almostResult }}
+                </div>
+
+                <div class="compare-grid">
+                    <div class="compare-box">
+                        <h4>{{ t.yourInput }}</h4>
+                        <div v-for="(ing, i) in currentLearnCard.ingredients" :key="'u'+i" style="padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.15); font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+                            <i class="fas" :class="answerResults[i] ? 'fa-check' : 'fa-times'" :style="{ color: answerResults[i] ? 'var(--success)' : 'var(--danger)' }"></i>
+                            <span :style="{ textDecoration: answerResults[i] ? 'none' : 'line-through', opacity: userAnswers[i] ? 1 : 0.5 }">
+                                {{ i + 1 }}. {{ userAnswers[i] || '—' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="compare-box">
+                        <h4>{{ t.solutionTitle }}</h4>
+                        <div v-for="(ing, i) in currentLearnCard.ingredients" :key="'s'+i" style="padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.15); font-size: 0.92rem; font-weight: 700;">
+                            {{ i + 1 }}. {{ ing }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <button v-if="!lastRoundAllCorrect" class="action-btn-secondary" style="flex:1;" @click="overrideAsCorrect">
+                        <i class="fas fa-thumbs-up"></i> {{ t.markAsCorrect }}
+                    </button>
+                    <button class="action-btn-primary" style="flex:2; margin-top:0;" @click="nextLearnCard">
+                        {{ t.nextCard }} <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- FOCUS MODE OVERLAY (WORKS FOR ASSISTANT & BARKEEPER STOCK) -->
+    <!-- ========================================================= -->
     <div v-if="focusMode" class="focus-overlay-container">
         <div class="scroll-row">
             <button class="manage-btn" :class="{ 'active-sort': sortMode }" @click="toggleSortMode" style="margin-right: 8px;">
                 <i class="fas fa-sort"></i>
             </button>
             
-            <button v-for="cat in categories" :key="cat" class="tab-btn" :class="{ active: currentCategory === cat }" @click="currentCategory = cat">
+            <button v-for="cat in activeCategoriesList" :key="cat" class="tab-btn" :class="{ active: activeCategory === cat }" @click="setActiveCategory(cat)">
                 {{ cat === 'Alle' ? t.all : cat }}
             </button>
         </div>
         
         <template v-for="(groupItems, groupName) in displayedGroups" :key="'focus-'+groupName">
-            <div v-if="currentCategory === 'Alle' && groupItems.length > 0" class="group-header">
+            <div v-if="activeCategory === 'Alle' && groupItems.length > 0" class="group-header">
                 {{ groupName === 'Alle' ? t.all : (groupName === 'Sonstiges' ? t.other : groupName) }}
             </div>
             
@@ -473,11 +923,12 @@
         <div class="float-btn" @click="exitFocusMode"><i class="fas fa-arrow-left"></i></div>
     </div>
 
-    <div class="add-panel">
+    <!-- ADD PANEL (Shown in Assistant Mode AND in Barkeeper Stock Mode) -->
+    <div class="add-panel" v-if="role === 'assistant' || (role === 'barkeeper' && barkeeperTab === 'stock')">
         <div style="display:flex; width:100%; gap:8px;">
             <input type="text" v-model="newItemName" :placeholder="t.drinkPlaceholder" class="input-clean">
-            <select v-model="newItemCat" class="input-select" style="width: 100px;">
-                <option v-for="cat in categories.filter(c => c !== 'Alle')" :value="cat">{{ cat }}</option>
+            <select v-model="activeNewItemCat" class="input-select" style="width: 115px;">
+                <option v-for="cat in activeCategoriesList.filter(c => c !== 'Alle')" :value="cat">{{ cat }}</option>
             </select>
             <button class="btn-add" @click="addNewItem"><i class="fas fa-plus"></i></button>
         </div>
@@ -490,7 +941,7 @@
             <button class="modal-btn btn-save" @click="addBar">{{ t.add }}</button>
             <div style="margin-top:20px; border-top:1px solid #333; padding-top:10px;">
                 <p style="font-size:0.9rem; color:#888;">{{ t.current }}: <strong>{{ activeBarName }}</strong></p>
-                <button v-if="bars.length > 1" class="modal-btn btn-danger" :class="{ 'confirm-state': deleteBarConfirm }" @click="handleDeleteBar">{{ deleteBarConfirm ? t.sureTapAgain : t.deleteThisBar }}</button>
+                <button v-if="activeBarsList.length > 1" class="modal-btn btn-danger" :class="{ 'confirm-state': deleteBarConfirm }" @click="handleDeleteBar">{{ deleteBarConfirm ? t.sureTapAgain : t.deleteThisBar }}</button>
             </div>
             <button class="modal-btn btn-close" @click="modals.bar = false">{{ t.close }}</button>
         </div>
@@ -502,7 +953,7 @@
             <input v-model="newCatName" :placeholder="t.newSize" class="input-clean" style="width:90%; margin-bottom:10px;">
             <button class="modal-btn btn-save" @click="addCategory">{{ t.add }}</button>
             <div style="margin-top:20px; max-height: 200px; overflow-y:auto;">
-                <div v-for="cat in categories.filter(c => c !== 'Alle')" :key="cat" style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #333;">
+                <div v-for="cat in activeCategoriesList.filter(c => c !== 'Alle')" :key="cat" style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #333;">
                     <span>{{ cat }}</span>
                     <button @click="deleteCategory(cat)" style="background:transparent; color:var(--danger); border:none;"><i class="fas fa-trash"></i></button>
                 </div>
@@ -523,6 +974,17 @@
     const translations = {
         de: {
             title: "Mia Stock", all: "Alle", other: "Sonstiges",
+            assistant: "Assistent", barkeeper: "Barkeeper",
+            bkStockTab: "Flaschen", bkRecipesTab: "Rezepte", bkLearnTab: "Lernmodus",
+            searchDrink: "Getränk suchen...", alkoholfrei: "Alkoholfrei",
+            swipeHint: "Horizontal wischen",
+            cardStat: "Statistik", resetStats: "Reset",
+            memorizePrompt: "Zutaten einprägen!", startTypingNow: "Sofort eintragen",
+            holdToPeek: "Gedrückt halten zum Spicken",
+            ingredientPlaceholder: "Zutat / Schritt", checkAnswers: "Überprüfen",
+            perfectResult: "Perfekt! Alles richtig!", almostResult: "Nicht ganz richtig – schau nochmal:",
+            yourInput: "Deine Eingabe", solutionTitle: "Lösung",
+            markAsCorrect: "War richtig (Tippfehler)", nextCard: "Nächste Karte",
             dragToSort: "Ziehen zum Sortieren", reallyDelete: "Wirklich löschen?",
             allDone: "Alles erledigt! (Liste leer)", noDrinks: "Keine Getränke angelegt.",
             resetBar: "Bar \"%s\" nullen", yesDeleteAll: "Ja, alles löschen", cancel: "Abbruch",
@@ -533,6 +995,17 @@
         },
         en: {
             title: "Mia Stock", all: "All", other: "Other",
+            assistant: "Assistant", barkeeper: "Bartender",
+            bkStockTab: "Bottles", bkRecipesTab: "Recipes", bkLearnTab: "Learn Mode",
+            searchDrink: "Search drink...", alkoholfrei: "Non-Alcoholic",
+            swipeHint: "Swipe horizontally",
+            cardStat: "Stats", resetStats: "Reset",
+            memorizePrompt: "Memorize ingredients!", startTypingNow: "Type now",
+            holdToPeek: "Hold card to peek",
+            ingredientPlaceholder: "Ingredient / Step", checkAnswers: "Check Answers",
+            perfectResult: "Perfect! All correct!", almostResult: "Not quite right – compare below:",
+            yourInput: "Your Input", solutionTitle: "Solution",
+            markAsCorrect: "Count as correct", nextCard: "Next Card",
             dragToSort: "Drag to sort", reallyDelete: "Really delete?",
             allDone: "All done! (List empty)", noDrinks: "No drinks added.",
             resetBar: "Reset Bar \"%s\"", yesDeleteAll: "Yes, delete all", cancel: "Cancel",
@@ -543,6 +1016,17 @@
         },
         ar: {
             title: "ميا ستوك", all: "الكل", other: "أخرى",
+            assistant: "مساعد", barkeeper: "بارتندر",
+            bkStockTab: "الزجاجات", bkRecipesTab: "الوصفات", bkLearnTab: "وضع التعلم",
+            searchDrink: "ابحث عن مشروب...", alkoholfrei: "بدون كحول",
+            swipeHint: "اسحب أفقياً",
+            cardStat: "إحصائيات", resetStats: "إعادة ضبط",
+            memorizePrompt: "احفظ المكونات!", startTypingNow: "ابدأ الكتابة الآن",
+            holdToPeek: "اضغط مطولاً لإظهار الحل",
+            ingredientPlaceholder: "المكون / الخطوة", checkAnswers: "تحقق",
+            perfectResult: "ممتاز! كل شيء صحيح!", almostResult: "ليس صحيحاً تماماً - قارن الحل:",
+            yourInput: "إجابتك", solutionTitle: "الحل الصحيح",
+            markAsCorrect: "اعتبرها صحيحة", nextCard: "البطاقة التالية",
             dragToSort: "اسحب للترتيب", reallyDelete: "هل تريد الحذف حقًا؟",
             allDone: "تم كل شيء! (القائمة فارغة)", noDrinks: "لم تتم إضافة مشروبات.",
             resetBar: "تصفير البار \"%s\"", yesDeleteAll: "نعم، احذف الكل", cancel: "إلغاء",
@@ -554,7 +1038,7 @@
     };
 
     // =========================================================
-    // HIER SIND ALLE DEINE VOREINGESTELLTEN GETRÄNKE:
+    // VOREINGESTELLTE GETRÄNKE FÜR ASSISTENTEN:
     // =========================================================
     function getDefaultItems() {
         const standardDrinks = [
@@ -623,7 +1107,74 @@
             completed: false 
         }));
     }
+
     // =========================================================
+    // VOREINGESTELLTE ALKOHOL-FLASCHEN FÜR BARKEEPER:
+    // =========================================================
+    function getDefaultBarkeeperItems() {
+        const barkeeperSpirits = [
+            { name: 'Mia Wodka', category: 'Spirituosen' },
+            { name: 'Bacardi weiß', category: 'Spirituosen' },
+            { name: 'Havanna', category: 'Spirituosen' },
+            { name: 'Pitu', category: 'Spirituosen' },
+            { name: 'Harpoon', category: 'Spirituosen' },
+            { name: 'Gin', category: 'Spirituosen' },
+            { name: 'Blauer Gin', category: 'Spirituosen' },
+            { name: 'Tequila weiß', category: 'Spirituosen' },
+            { name: 'Tequila braun', category: 'Spirituosen' },
+            { name: 'Asbach', category: 'Spirituosen' },
+
+            { name: 'Aperol', category: 'Liköre & Limes' },
+            { name: 'Malibu', category: 'Liköre & Limes' },
+            { name: 'Apricot Brandy', category: 'Liköre & Limes' },
+            { name: 'Peach Tree', category: 'Liköre & Limes' },
+            { name: 'Kirschlikör', category: 'Liköre & Limes' },
+            { name: 'Erdbeerlimes', category: 'Liköre & Limes' },
+            { name: 'Kahlúa', category: 'Liköre & Limes' },
+            { name: 'Baileys', category: 'Liköre & Limes' },
+
+            { name: 'Prosecco', category: 'Sirup & Extras' },
+            { name: 'Vanillesirup', category: 'Sirup & Extras' },
+            { name: 'Grenadine', category: 'Sirup & Extras' }
+        ];
+
+        return barkeeperSpirits.map(drink => ({
+            id: Date.now() + Math.random(),
+            name: drink.name,
+            count: 0,
+            category: drink.category,
+            completed: false
+        }));
+    }
+
+    // =========================================================
+    // ALLE 23 COCKTAIL-KARTEN & VARIATIONEN (MIA NIGHT CLUB):
+    // =========================================================
+    const COCKTAIL_CARDS = [
+        { id: 'c1', name: 'Prosecco Aperol', alkoholfrei: false, color: '#f5b041', ingredients: ['Orangenscheibe', '4cl Aperol', 'Prosecco', 'Wasser g.T.'] },
+        { id: 'c2', name: 'Aperol Sprizz', alkoholfrei: false, color: '#f5b041', ingredients: ['Orangenscheibe', '4cl Aperol', 'Prosecco', 'Wasser g.T.'] },
+        { id: 'c3', name: 'Apfelstrudel groß', alkoholfrei: false, color: '#eb984e', ingredients: ['4cl Malibu', 'Zimt', 'Apfelsaft'] },
+        { id: 'c4', name: 'Apfelstrudel klein', alkoholfrei: false, color: '#eb984e', ingredients: ['2cl Malibu', 'Zimt', 'Apfelsaft'] },
+        { id: 'c5', name: 'Caipirinha', alkoholfrei: false, color: '#ec7063', ingredients: ['6 Limetten', '2 Löffel Zucker', '2cl Lime Juice', 'Stößeln – Eis', '5cl Pitu', 'Umrühren – Eis'] },
+        { id: 'c6', name: 'Cubra Libre', alkoholfrei: false, color: '#cd6155', ingredients: ['2 Limetten', '4cl Havanna', 'Cola'] },
+        { id: 'c7', name: 'Gin Tonic', alkoholfrei: false, color: '#a569bd', ingredients: ['4cl blauer Gin', 'Tonic Water', 'Limette'] },
+        { id: 'c8', name: 'Long Island Iced Tea', alkoholfrei: false, color: '#5c6bc0', ingredients: ['2cl Wodka', '2cl weißer Tequila', '2cl Barcadi weiß', '2cl Gin', '1cl Zitronensaft', '1cl Orangensaft', 'Cola', '2 Limetten'] },
+        { id: 'c9', name: 'Solero', alkoholfrei: false, color: '#4fc3f7', ingredients: ['4cl Wodka', '2cl Vanillesirup', '1cl Zitrone', 'Orange & Maracuja shaken'] },
+        { id: 'c10', name: 'Touch Down', alkoholfrei: false, color: '#4db6ac', ingredients: ['4cl Wodka', '2cl Apricot Brandy', '1cl Grenadine', '1cl Zitrone', 'Orange & Maracuja shaken'] },
+        { id: 'c11', name: 'Sex on the Beach', alkoholfrei: false, color: '#4db6ac', ingredients: ['4cl Wodka', '2cl Peach Tree', '1cl Grenadine', '1cl Zitrone', 'Orange & Maracuja shaken'] },
+        { id: 'c12', name: 'Tequila Sunrise', alkoholfrei: false, color: '#66bb6a', ingredients: ['4cl weißer Tequila', 'Orangensaft', 'Grenadine (Glasrand)'] },
+        { id: 'c13', name: 'Zombie', alkoholfrei: false, color: '#9ccc65', ingredients: ['4cl weißer Barcadi', '2cl Kirschlikör', '1cl Grenadine', '1cl Zitrone', 'Orangensaft', 'shaken', '1–2cl Harpoon'] },
+        { id: 'c14', name: 'Moscow Mule', alkoholfrei: false, color: '#fbc02d', ingredients: ['4cl Wodka', '1cl Zitrone', 'Ginger Beer'] },
+        { id: 'c15', name: 'Munich Mule', alkoholfrei: false, color: '#fbc02d', ingredients: ['4cl blauer Gin', '1cl Zitrone', 'Ginger Beer'] },
+        { id: 'c16', name: 'Fruit Punch', alkoholfrei: true, color: '#ffa726', ingredients: ['2cl Zitrone', '2cl Grenadine', 'Orange & Maracuja', 'Shaken', 'Kirschsaft drüber'] },
+        { id: 'c17', name: 'Virgin Caipirinha', alkoholfrei: true, color: '#ffa726', ingredients: ['6 Limetten', '2 Löffel Zucker', '2cl Lime Juice', 'Stößeln – Eis', 'Ginger Ale', 'umrühren'] },
+        { id: 'c18', name: 'Fluschfinger groß', alkoholfrei: false, color: '#ff8a65', ingredients: ['4cl Erdbeerlimes', 'Fanta'] },
+        { id: 'c19', name: 'Fluschfinger klein', alkoholfrei: false, color: '#ff8a65', ingredients: ['2cl Erdbeerlimes', 'Fanta'] },
+        { id: 'c20', name: 'Rüscherl groß', alkoholfrei: false, color: '#e57373', ingredients: ['4cl Asbach', 'Cola'] },
+        { id: 'c21', name: 'Rüscherl klein', alkoholfrei: false, color: '#e57373', ingredients: ['2cl Asbach', 'Cola'] },
+        { id: 'c22', name: 'Wodka Limes', alkoholfrei: false, color: '#ba68c8', ingredients: ['2cl Wodka', '2cl Lime Juice'] },
+        { id: 'c23', name: 'B52', alkoholfrei: false, color: '#9575cd', ingredients: ['Kalua', 'Bailey\'s', 'Harpoon'] }
+    ];
 
     const { createApp, nextTick } = Vue;
 
@@ -631,43 +1182,118 @@
         data() {
             return {
                 lang: 'de', langMenuOpen: false,
+                role: 'assistant', // 'assistant' | 'barkeeper'
+                barkeeperTab: 'stock', // 'stock' | 'recipes' | 'learn'
                 isDark: true, focusMode: false, clipboardMode: false,
                 sortMode: false,
                 modals: { bar: false, cat: false },
                 resetBarMode: false, deleteBarConfirm: false, deleteModeId: null,
+                
+                // Assistenten-Daten (Original)
                 currentCategory: 'Alle',
                 categories: ['Alle', '0.2L', '0.25L', '0.33L', '0.5L', '0.75L', '1.0L'],
                 newItemName: '', newItemCat: '0.33L', newBarName: '', newCatName: '',
                 activeBarIndex: 0,
                 bars: [{ id: 'b1', name: 'Bar 1', items: [] }, { id: 'b2', name: 'Bar 2', items: [] }],
+                
+                // Barkeeper-Flaschen-Daten (Neu)
+                currentBkCategory: 'Alle',
+                bkCategories: ['Alle', 'Spirituosen', 'Liköre & Limes', 'Sirup & Extras'],
+                newBkItemCat: 'Spirituosen',
+                activeBkBarIndex: 0,
+                bkBars: [{ id: 'bkb1', name: 'Haupttheke', items: [] }, { id: 'bkb2', name: 'Bar 2', items: [] }],
+
+                // Barkeeper Rezepte & Lernmodus
+                cocktails: COCKTAIL_CARDS,
+                recipeSearch: '',
+                activeRecipeIdx: 0,
+                learnStats: {}, // { [cardId]: { correct: 0, wrong: 0 } }
+                currentLearnCard: null,
+                learnPhase: 'memorize', // 'memorize' | 'input' | 'result'
+                memorizeTimeLeft: 3000,
+                memorizeTimer: null,
+                isPeeking: false,
+                userAnswers: [],
+                answerResults: [],
+                lastRoundAllCorrect: false,
+
                 sortableInstances: []
             }
         },
         computed: {
             t() { return translations[this.lang]; },
-            activeBarName() { return this.bars[this.activeBarIndex].name; },
+            activeBarsList() {
+                return this.role === 'barkeeper' ? this.bkBars : this.bars;
+            },
+            currentBarIndex() {
+                return this.role === 'barkeeper' ? this.activeBkBarIndex : this.activeBarIndex;
+            },
+            activeCategoriesList() {
+                return this.role === 'barkeeper' ? this.bkCategories : this.categories;
+            },
+            activeCategory() {
+                return this.role === 'barkeeper' ? this.currentBkCategory : this.currentCategory;
+            },
+            activeNewItemCat: {
+                get() {
+                    return this.role === 'barkeeper' ? this.newBkItemCat : this.newItemCat;
+                },
+                set(val) {
+                    if (this.role === 'barkeeper') this.newBkItemCat = val;
+                    else this.newItemCat = val;
+                }
+            },
+            activeBarName() {
+                const list = this.activeBarsList;
+                const idx = this.currentBarIndex;
+                return (list[idx] && list[idx].name) ? list[idx].name : '';
+            },
             displayedGroups() {
-                let items = this.bars[this.activeBarIndex].items;
+                const list = this.activeBarsList;
+                const idx = this.currentBarIndex;
+                let items = (list[idx] && list[idx].items) ? list[idx].items : [];
                 if (this.clipboardMode) items = items.filter(item => item.count > 0);
-                if (this.currentCategory !== 'Alle') return { [this.currentCategory]: items.filter(i => i.category === this.currentCategory) };
+                if (this.activeCategory !== 'Alle') return { [this.activeCategory]: items.filter(i => i.category === this.activeCategory) };
                 const groups = {};
-                this.categories.forEach(cat => {
+                this.activeCategoriesList.forEach(cat => {
                     if (cat === 'Alle') return;
                     const catItems = items.filter(i => i.category === cat);
                     if (catItems.length > 0) groups[cat] = catItems;
                 });
-                const uncategorized = items.filter(i => !this.categories.includes(i.category));
+                const uncategorized = items.filter(i => !this.activeCategoriesList.includes(i.category));
                 if (uncategorized.length > 0) groups['Sonstiges'] = uncategorized;
                 return groups;
             },
-            isListEmpty() { return Object.values(this.displayedGroups).every(arr => arr.length === 0); }
+            isListEmpty() { return Object.values(this.displayedGroups).every(arr => arr.length === 0); },
+            filteredRecipes() {
+                const q = this.recipeSearch.trim().toLowerCase();
+                if (!q) return this.cocktails;
+                return this.cocktails.filter(c =>
+                    c.name.toLowerCase().includes(q) ||
+                    c.ingredients.some(ing => ing.toLowerCase().includes(q))
+                );
+            }
         },
         watch: {
             sortMode() { this.initSortables(); },
             currentCategory() { setTimeout(this.initSortables, 100); },
+            currentBkCategory() { setTimeout(this.initSortables, 100); },
+            role() { setTimeout(this.initSortables, 100); },
+            barkeeperTab() { setTimeout(this.initSortables, 100); },
             focusMode() { setTimeout(this.initSortables, 100); }
         },
         methods: {
+            setRole(r) {
+                this.role = r;
+                this.sortMode = false;
+                this.deleteModeId = null;
+                this.resetBarMode = false;
+                this.saveData();
+            },
+            setActiveCategory(cat) {
+                if (this.role === 'barkeeper') this.currentBkCategory = cat;
+                else this.currentCategory = cat;
+            },
             closeLangMenu(e) { if (!e.target.closest('.lang-menu-container')) this.langMenuOpen = false; },
             setLang(l) { this.lang = l; this.langMenuOpen = false; this.applyLang(); this.saveData(); },
             applyLang() { 
@@ -675,12 +1301,140 @@
                 document.documentElement.dir = this.lang === 'ar' ? 'rtl' : 'ltr'; 
             },
             toggleTheme() { this.isDark = !this.isDark; this.applyTheme(); this.saveData(); },
-            enterFocusMode() { this.focusMode = true; this.clipboardMode = false; this.currentCategory = 'Alle'; this.sortMode = false; },
-            enterClipboardFocus() { this.focusMode = true; this.clipboardMode = true; this.currentCategory = 'Alle'; this.sortMode = false; },
+            enterFocusMode() {
+                if (this.role === 'barkeeper') this.barkeeperTab = 'stock';
+                this.focusMode = true;
+                this.clipboardMode = false;
+                this.setActiveCategory('Alle');
+                this.sortMode = false;
+            },
+            enterClipboardFocus() {
+                if (this.role === 'barkeeper') this.barkeeperTab = 'stock';
+                this.focusMode = true;
+                this.clipboardMode = true;
+                this.setActiveCategory('Alle');
+                this.sortMode = false;
+            },
             exitFocusMode() { this.focusMode = false; this.clipboardMode = false; this.sortMode = false; },
             toggleClipboardMode() { this.clipboardMode = !this.clipboardMode; },
             toggleSortMode() { this.sortMode = !this.sortMode; this.deleteModeId = null; },
 
+            // --- REZEPTE CAROUSEL ---
+            scrollToRecipe(idx) {
+                this.activeRecipeIdx = idx;
+                const el = this.$refs.recipeCarousel;
+                if (!el || !el.children[idx]) return;
+                el.children[idx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            },
+            onCarouselScroll(e) {
+                const el = e.target;
+                if (!el.children.length) return;
+                const cardWidth = el.children[0].offsetWidth + 15;
+                const idx = Math.round(el.scrollLeft / cardWidth);
+                if (idx >= 0 && idx < this.filteredRecipes.length) {
+                    this.activeRecipeIdx = idx;
+                }
+            },
+
+            // --- INTERAKTIVER LERNMODUS ---
+            getCardStat(id) {
+                if (!this.learnStats[id]) {
+                    this.learnStats[id] = { correct: 0, wrong: 0 };
+                }
+                return this.learnStats[id];
+            },
+            startLearnMode() {
+                this.barkeeperTab = 'learn';
+                if (!this.currentLearnCard) {
+                    this.nextLearnCard();
+                }
+            },
+            pickWeightedCard() {
+                const weights = this.cocktails.map(c => {
+                    const st = this.getCardStat(c.id);
+                    const base = 10;
+                    const weight = Math.max(1, (base + st.wrong * 8) / (1 + st.correct * 0.7));
+                    if (this.currentLearnCard && this.currentLearnCard.id === c.id && this.cocktails.length > 1) {
+                        return weight * 0.1;
+                    }
+                    return weight;
+                });
+                const total = weights.reduce((a, b) => a + b, 0);
+                let r = Math.random() * total;
+                for (let i = 0; i < this.cocktails.length; i++) {
+                    r -= weights[i];
+                    if (r <= 0) return this.cocktails[i];
+                }
+                return this.cocktails[0];
+            },
+            nextLearnCard() {
+                if (this.memorizeTimer) clearInterval(this.memorizeTimer);
+                this.currentLearnCard = this.pickWeightedCard();
+                this.userAnswers = this.currentLearnCard.ingredients.map(() => '');
+                this.answerResults = [];
+                this.isPeeking = false;
+                this.learnPhase = 'memorize';
+                this.memorizeTimeLeft = 3000;
+
+                this.memorizeTimer = setInterval(() => {
+                    this.memorizeTimeLeft -= 100;
+                    if (this.memorizeTimeLeft <= 0) {
+                        clearInterval(this.memorizeTimer);
+                        this.memorizeTimer = null;
+                        this.learnPhase = 'input';
+                    }
+                }, 100);
+            },
+            skipMemorize() {
+                if (this.memorizeTimer) {
+                    clearInterval(this.memorizeTimer);
+                    this.memorizeTimer = null;
+                }
+                this.learnPhase = 'input';
+            },
+            normalizeIngredient(str) {
+                return (str || '')
+                    .toLowerCase()
+                    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+                    .replace(/barcadi/g, 'bacardi')
+                    .replace(/kahlua|kalua|kahlúa/g, 'kalua')
+                    .replace(/baileys|bailey's/g, 'baileys')
+                    .replace(/[-–—.,']/g, ' ')
+                    .replace(/\s+/g, '')
+                    .trim();
+            },
+            checkLearnAnswers() {
+                const expected = this.currentLearnCard.ingredients;
+                this.answerResults = expected.map((exp, idx) => {
+                    const uNorm = this.normalizeIngredient(this.userAnswers[idx]);
+                    const eNorm = this.normalizeIngredient(exp);
+                    if (!uNorm) return false;
+                    return uNorm === eNorm;
+                });
+                this.lastRoundAllCorrect = this.answerResults.every(Boolean);
+                const st = this.getCardStat(this.currentLearnCard.id);
+                if (this.lastRoundAllCorrect) {
+                    st.correct++;
+                } else {
+                    st.wrong++;
+                }
+                this.learnPhase = 'result';
+                this.saveData();
+            },
+            overrideAsCorrect() {
+                const st = this.getCardStat(this.currentLearnCard.id);
+                if (st.wrong > 0) st.wrong--;
+                st.correct++;
+                this.lastRoundAllCorrect = true;
+                this.answerResults = this.currentLearnCard.ingredients.map(() => true);
+                this.saveData();
+            },
+            resetLearnStats() {
+                this.learnStats = {};
+                this.saveData();
+            },
+
+            // --- SORTABLE & LISTEN-LOGIK ---
             initSortables() {
                 this.sortableInstances.forEach(inst => inst.destroy());
                 this.sortableInstances = [];
@@ -691,7 +1445,6 @@
                     const containers = document.querySelectorAll('.sortable-list');
                     containers.forEach(el => {
                         const sortable = new Sortable(el, {
-                            // OPTIMIERTES SCROLLING
                             delay: 150, 
                             delayOnTouchOnly: true, 
                             animation: 150,
@@ -712,7 +1465,9 @@
 
             handleSortEnd(oldIndex, newIndex, catName) {
                 if(oldIndex === newIndex) return;
-                const allItems = this.bars[this.activeBarIndex].items;
+                const list = this.activeBarsList;
+                const idx = this.currentBarIndex;
+                const allItems = list[idx].items;
                 const itemsInCat = allItems.filter(i => i.category === catName);
                 const movedItem = itemsInCat[oldIndex];
                 itemsInCat.splice(oldIndex, 1);
@@ -729,16 +1484,38 @@
                 const newMainList = [...otherItems];
                 newMainList.splice(countOthersBefore, 0, ...itemsInCat);
                 
-                this.bars[this.activeBarIndex].items = newMainList;
+                list[idx].items = newMainList;
                 this.saveData();
             },
 
             applyTheme() { const h = document.documentElement; this.isDark ? h.setAttribute('data-theme', 'dark') : h.removeAttribute('data-theme'); },
-            switchBar(i) { this.activeBarIndex = i; this.deleteModeId = null; this.resetBarMode = false; this.sortMode = false; this.saveData(); },
+            switchBar(i) {
+                if (this.role === 'barkeeper') this.activeBkBarIndex = i;
+                else this.activeBarIndex = i;
+                this.deleteModeId = null;
+                this.resetBarMode = false;
+                this.sortMode = false;
+                this.saveData();
+            },
             openBarModal() { this.modals.bar = true; this.deleteBarConfirm = false; },
             openCatModal() { this.modals.cat = true; },
-            addCategory() { if(this.newCatName.trim()) { this.categories.push(this.newCatName); this.newCatName=''; this.saveData(); } },
-            deleteCategory(cat) { this.categories = this.categories.filter(c => c !== cat); if(this.currentCategory === cat) this.currentCategory='Alle'; this.saveData(); },
+            addCategory() {
+                if(this.newCatName.trim()) {
+                    this.activeCategoriesList.push(this.newCatName.trim());
+                    this.newCatName='';
+                    this.saveData();
+                }
+            },
+            deleteCategory(cat) {
+                if (this.role === 'barkeeper') {
+                    this.bkCategories = this.bkCategories.filter(c => c !== cat);
+                    if (this.currentBkCategory === cat) this.currentBkCategory = 'Alle';
+                } else {
+                    this.categories = this.categories.filter(c => c !== cat);
+                    if (this.currentCategory === cat) this.currentCategory = 'Alle';
+                }
+                this.saveData();
+            },
             increment(i) { i.count++; i.completed = false; this.saveData(); },
             decrement(i) { if(i.count>0) i.count--; i.completed = false; this.saveData(); },
             resetCount(i) { i.count=0; i.completed=false; this.saveData(); },
@@ -746,26 +1523,75 @@
             initDelete(i) { this.deleteModeId=i.id; },
             cancelDelete() { this.deleteModeId=null; },
             
-            confirmDelete(i) { const b = this.bars[this.activeBarIndex]; b.items = b.items.filter(it => it.id !== i.id); this.deleteModeId=null; this.saveData(); },
+            confirmDelete(i) {
+                const b = this.activeBarsList[this.currentBarIndex];
+                b.items = b.items.filter(it => it.id !== i.id);
+                this.deleteModeId=null;
+                this.saveData();
+            },
             
             addNewItem() {
                 if(!this.newItemName.trim()) return;
-                this.bars[this.activeBarIndex].items.push({ id: Date.now(), name: this.newItemName, count: 0, category: this.newItemCat, completed: false });
-                this.newItemName=''; this.saveData();
+                this.activeBarsList[this.currentBarIndex].items.push({
+                    id: Date.now(),
+                    name: this.newItemName,
+                    count: 0,
+                    category: this.activeNewItemCat,
+                    completed: false
+                });
+                this.newItemName='';
+                this.saveData();
             },
             
             addBar() { 
-                if(this.newBarName.trim()) { 
-                    this.bars.push({ id: 'b'+Date.now(), name: this.newBarName, items: getDefaultItems()}); 
+                if(this.newBarName.trim()) {
+                    if (this.role === 'barkeeper') {
+                        this.bkBars.push({ id: 'bkb'+Date.now(), name: this.newBarName, items: getDefaultBarkeeperItems() });
+                    } else {
+                        this.bars.push({ id: 'b'+Date.now(), name: this.newBarName, items: getDefaultItems() });
+                    }
                     this.newBarName=''; 
                     this.modals.bar=false; 
                     this.saveData(); 
                 } 
             },
             
-            handleDeleteBar() { if(!this.deleteBarConfirm) { this.deleteBarConfirm=true; } else { this.bars.splice(this.activeBarIndex, 1); this.activeBarIndex=0; this.modals.bar=false; this.saveData(); } },
-            resetAllInBar() { this.bars[this.activeBarIndex].items.forEach(i => { i.count=0; i.completed=false; }); this.resetBarMode=false; this.saveData(); },
-            saveData() { localStorage.setItem('miaStockData_LIVE', JSON.stringify({ bars: this.bars, categories: this.categories, theme: this.isDark, activeBarIndex: this.activeBarIndex, clipboardMode: this.clipboardMode, lang: this.lang })); },
+            handleDeleteBar() {
+                if(!this.deleteBarConfirm) {
+                    this.deleteBarConfirm=true;
+                } else {
+                    if (this.role === 'barkeeper') {
+                        this.bkBars.splice(this.activeBkBarIndex, 1);
+                        this.activeBkBarIndex = 0;
+                    } else {
+                        this.bars.splice(this.activeBarIndex, 1);
+                        this.activeBarIndex = 0;
+                    }
+                    this.modals.bar=false;
+                    this.saveData();
+                }
+            },
+            resetAllInBar() {
+                this.activeBarsList[this.currentBarIndex].items.forEach(i => { i.count=0; i.completed=false; });
+                this.resetBarMode=false;
+                this.saveData();
+            },
+            saveData() {
+                localStorage.setItem('miaStockData_LIVE', JSON.stringify({
+                    bars: this.bars,
+                    categories: this.categories,
+                    theme: this.isDark,
+                    activeBarIndex: this.activeBarIndex,
+                    clipboardMode: this.clipboardMode,
+                    lang: this.lang,
+                    role: this.role,
+                    barkeeperTab: this.barkeeperTab,
+                    bkBars: this.bkBars,
+                    bkCategories: this.bkCategories,
+                    activeBkBarIndex: this.activeBkBarIndex,
+                    learnStats: this.learnStats
+                }));
+            },
             
             loadData() {
                 const s = localStorage.getItem('miaStockData_LIVE');
@@ -777,6 +1603,19 @@
                     if(p.categories) { this.categories=p.categories; }
                     this.clipboardMode = p.clipboardMode || false;
                     if(p.lang) { this.lang = p.lang; }
+                    if(p.role) { this.role = p.role; }
+                    if(p.barkeeperTab) { this.barkeeperTab = p.barkeeperTab; }
+                    if(p.bkCategories) { this.bkCategories = p.bkCategories; }
+                    if(typeof p.activeBkBarIndex === 'number') { this.activeBkBarIndex = p.activeBkBarIndex; }
+                    if(p.learnStats) { this.learnStats = p.learnStats; }
+                    if(p.bkBars && p.bkBars.length > 0) {
+                        this.bkBars = p.bkBars;
+                    } else {
+                        this.bkBars[0].name = this.t.mainBar;
+                        this.bkBars.forEach(bar => {
+                            bar.items = getDefaultBarkeeperItems();
+                        });
+                    }
                 } else {
                     const old13 = localStorage.getItem('miaStockData_v13');
                     const old12 = localStorage.getItem('miaStockData_v12');
@@ -786,13 +1625,17 @@
                         this.bars = p.bars;
                         this.isDark = p.theme;
                         this.categories = ['Alle', '0.2L', '0.25L', '0.33L', '0.5L', '0.75L', '1.0L']; 
-                        this.saveData(); 
                     } else {
                         this.bars[0].name = this.t.mainBar;
                         this.bars.forEach(bar => {
                             bar.items = getDefaultItems();
                         });
                     }
+                    this.bkBars[0].name = this.t.mainBar;
+                    this.bkBars.forEach(bar => {
+                        bar.items = getDefaultBarkeeperItems();
+                    });
+                    this.saveData();
                 }
                 this.applyTheme();
                 this.applyLang();
@@ -804,6 +1647,7 @@
         },
         beforeUnmount() {
             document.removeEventListener('click', this.closeLangMenu);
+            if (this.memorizeTimer) clearInterval(this.memorizeTimer);
         }
     }).mount('#app');
 </script>
