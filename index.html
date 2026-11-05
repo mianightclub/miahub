@@ -522,6 +522,7 @@
             margin-bottom: 8px;
         }
         .learn-input {
+            flex: 1;
             background: var(--input-bg);
             border: 2px solid transparent;
             color: var(--text-primary);
@@ -797,13 +798,13 @@
                     </div>
                 </div>
 
-                <!-- PHASE 1: 6 SEKUNDEN MERKEN -->
+                <!-- PHASE 1: 10 SEKUNDEN MERKEN -->
                 <template v-if="learnPhase === 'memorize'">
                     <div style="text-align: center; font-size: 0.9rem; color: var(--accent); font-weight: 700;">
                         <i class="fas fa-stopwatch"></i> {{ t.memorizePrompt }} ({{ Math.ceil(memorizeTimeLeft / 1000) }}s)
                     </div>
                     <div class="countdown-bar-wrap">
-                        <div class="countdown-bar-fill" :style="{ width: (memorizeTimeLeft / 6000 * 100) + '%' }"></div>
+                        <div class="countdown-bar-fill" :style="{ width: (memorizeTimeLeft / 10000 * 100) + '%' }"></div>
                     </div>
                     <ul class="ingredient-list">
                         <li v-for="(ing, i) in currentLearnCard.ingredients" :key="i">
@@ -834,10 +835,8 @@
                     <div style="margin-bottom: 12px;">
                         <div v-for="(ing, i) in currentLearnCard.ingredients" :key="i" class="learn-input-row">
                             <span class="ing-num">{{ i + 1 }}</span>
-                            <!-- Amount Input (e.g. "4cl") -->
-                            <input type="text" class="learn-input" v-model="userAnswers[i].amt" :placeholder="t.amount" style="width: 65px; flex: none; text-align: center;" @keyup.enter="i === currentLearnCard.ingredients.length - 1 ? checkLearnAnswers() : null">
-                            <!-- Ingredient Name Input -->
-                            <input type="text" class="learn-input" style="flex: 1;" v-model="userAnswers[i].ing" :placeholder="t.ingredientPlaceholder" @keyup.enter="i === currentLearnCard.ingredients.length - 1 ? checkLearnAnswers() : null">
+                            <!-- EINZELNES Eingabefeld (wieder rückgängig gemacht) -->
+                            <input type="text" class="learn-input" v-model="userAnswers[i]" :placeholder="t.ingredientPlaceholder" @keyup.enter="i === currentLearnCard.ingredients.length - 1 ? checkLearnAnswers() : null">
                         </div>
                     </div>
 
@@ -858,8 +857,8 @@
                             <h4>{{ t.yourInput }}</h4>
                             <div v-for="(ing, i) in currentLearnCard.ingredients" :key="'u'+i" style="padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.15); font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
                                 <i class="fas" :class="answerResults[i] ? 'fa-check' : 'fa-times'" :style="{ color: answerResults[i] ? 'var(--success)' : 'var(--danger)' }"></i>
-                                <span :style="{ textDecoration: answerResults[i] ? 'none' : 'line-through', opacity: (userAnswers[i].amt || userAnswers[i].ing) ? 1 : 0.5 }">
-                                    {{ i + 1 }}. {{ (userAnswers[i].amt + ' ' + userAnswers[i].ing).trim() || '—' }}
+                                <span :style="{ textDecoration: answerResults[i] ? 'none' : 'line-through', opacity: userAnswers[i] ? 1 : 0.5 }">
+                                    {{ i + 1 }}. {{ userAnswers[i] || '—' }}
                                 </span>
                             </div>
                         </div>
@@ -1017,7 +1016,7 @@
             cardStat: "Statistik", resetStats: "Reset",
             memorizePrompt: "Zutaten einprägen!", startTypingNow: "Sofort eintragen",
             holdToPeek: "Gedrückt halten zum Spicken",
-            amount: "Menge", ingredientPlaceholder: "Zutat", checkAnswers: "Überprüfen",
+            ingredientPlaceholder: "Zutat (z. B. 4cl Vodka)", checkAnswers: "Überprüfen",
             perfectResult: "Perfekt! Alles richtig!", almostResult: "Nicht ganz richtig – schau nochmal:",
             yourInput: "Deine Eingabe", solutionTitle: "Lösung",
             markAsCorrect: "War richtig (Tippfehler)", nextCard: "Nächste Karte",
@@ -1038,7 +1037,7 @@
             cardStat: "Stats", resetStats: "Reset",
             memorizePrompt: "Memorize ingredients!", startTypingNow: "Type now",
             holdToPeek: "Hold card to peek",
-            amount: "Amount", ingredientPlaceholder: "Ingredient", checkAnswers: "Check Answers",
+            ingredientPlaceholder: "Ingredient (e.g. 4cl Vodka)", checkAnswers: "Check Answers",
             perfectResult: "Perfect! All correct!", almostResult: "Not quite right – compare below:",
             yourInput: "Your Input", solutionTitle: "Solution",
             markAsCorrect: "Count as correct", nextCard: "Next Card",
@@ -1059,7 +1058,7 @@
             cardStat: "إحصائيات", resetStats: "إعادة ضبط",
             memorizePrompt: "احفظ المكونات!", startTypingNow: "ابدأ الكتابة الآن",
             holdToPeek: "اضغط مطولاً لإظهار الحل",
-            amount: "الكمية", ingredientPlaceholder: "المكون", checkAnswers: "تحقق",
+            ingredientPlaceholder: "المكون (مثال 4cl Vodka)", checkAnswers: "تحقق",
             perfectResult: "ممتاز! كل شيء صحيح!", almostResult: "ليس صحيحاً تماماً - قارن الحل:",
             yourInput: "إجابتك", solutionTitle: "الحل الصحيح",
             markAsCorrect: "اعتبرها صحيحة", nextCard: "البطاقة التالية",
@@ -1246,10 +1245,10 @@
                 learnStats: {}, // { [cardId]: { correct: 0, wrong: 0 } }
                 currentLearnCard: null,
                 learnPhase: 'memorize', // 'memorize' | 'input' | 'result'
-                memorizeTimeLeft: 6000,
+                memorizeTimeLeft: 10000,
                 memorizeTimer: null,
                 isPeeking: false,
-                userAnswers: [], // Array of { amt: '', ing: '' }
+                userAnswers: [], // Reset to single string array
                 answerResults: [],
                 lastRoundAllCorrect: false,
 
@@ -1406,11 +1405,11 @@
             nextLearnCard() {
                 if (this.memorizeTimer) clearInterval(this.memorizeTimer);
                 this.currentLearnCard = this.pickWeightedCard();
-                this.userAnswers = this.currentLearnCard.ingredients.map(() => ({ amt: '', ing: '' }));
+                this.userAnswers = this.currentLearnCard.ingredients.map(() => '');
                 this.answerResults = [];
                 this.isPeeking = false;
                 this.learnPhase = 'memorize';
-                this.memorizeTimeLeft = 6000;
+                this.memorizeTimeLeft = 10000;
 
                 this.memorizeTimer = setInterval(() => {
                     this.memorizeTimeLeft -= 100;
@@ -1443,8 +1442,7 @@
             checkLearnAnswers() {
                 const expected = this.currentLearnCard.ingredients;
                 this.answerResults = expected.map((exp, idx) => {
-                    const combinedUser = this.userAnswers[idx].amt + ' ' + this.userAnswers[idx].ing;
-                    const uNorm = this.normalizeIngredient(combinedUser);
+                    const uNorm = this.normalizeIngredient(this.userAnswers[idx]);
                     const eNorm = this.normalizeIngredient(exp);
                     if (!uNorm) return false;
                     return uNorm === eNorm;
