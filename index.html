@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mia Stock</title>
+    <title>Mia Hub</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon.png">
@@ -360,6 +360,8 @@
         /* --- BARKEEPER REZEPTE (SWIPE) & LERNMODUS --- */
         .bk-section {
             padding: 12px 15px 40px 15px;
+            height: 100%;
+            overflow-y: auto;
         }
         .swipe-carousel {
             display: flex;
@@ -392,18 +394,25 @@
             text-align: center;
             margin-bottom: 4px;
         }
-        .alkoholfrei-badge {
+        .recipe-badges {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 4px 0 12px 0;
+            flex-wrap: wrap;
+        }
+        .drink-badge {
             display: inline-block;
-            background: rgba(52, 199, 89, 0.18);
-            color: var(--success);
             font-size: 0.78rem;
             font-weight: 800;
-            padding: 3px 10px;
+            padding: 4px 10px;
             border-radius: 12px;
             text-transform: uppercase;
             letter-spacing: 0.6px;
-            margin: 4px auto 12px auto;
         }
+        .alkoholfrei-badge { background: rgba(52, 199, 89, 0.18); color: var(--success); }
+        .shaken-badge { background: rgba(0, 122, 255, 0.18); color: var(--accent); }
+
         .ingredient-list {
             list-style: none;
             padding: 0;
@@ -441,7 +450,7 @@
             padding: 20px;
             box-shadow: var(--shadow);
             max-width: 480px;
-            margin: 0 auto;
+            margin: 0 auto 20px auto;
             position: relative;
             user-select: none;
             -webkit-user-select: none;
@@ -513,7 +522,6 @@
             margin-bottom: 8px;
         }
         .learn-input {
-            flex: 1;
             background: var(--input-bg);
             border: 2px solid transparent;
             color: var(--text-primary);
@@ -580,10 +588,11 @@
         }
     </style>
 </head>
-<body :class="{ 'focus-mode-active': focusMode }">
+<body :class="{ 'focus-mode-active': focusMode || (role === 'barkeeper' && barkeeperTab !== 'stock') }">
 
 <div id="app">
-    <div class="top-section-wrapper">
+    <!-- MAIN HEADER (Hidden in Recipes/Learn Mode & Focus Mode) -->
+    <div class="top-section-wrapper" v-show="!(focusMode || (role === 'barkeeper' && barkeeperTab !== 'stock'))">
         <header>
             <div class="top-row">
                 <div class="title-role-group">
@@ -613,27 +622,27 @@
                 </div>
             </div>
 
-            <!-- BARKEEPER SUB-NAVIGATION -->
+            <!-- BARKEEPER SUB-NAVIGATION (MAIN SCREEN) -->
             <div v-if="role === 'barkeeper'" class="bk-mode-tabs">
                 <button class="bk-mode-btn" :class="{ active: barkeeperTab === 'stock' }" @click="barkeeperTab = 'stock'">
                     <i class="fas fa-wine-bottle"></i> {{ t.bkStockTab }}
                 </button>
                 <button class="bk-mode-btn" :class="{ active: barkeeperTab === 'recipes' }" @click="barkeeperTab = 'recipes'">
-                    <i class="fas fa-book-open"></i> {{ t.bkRecipesTab }}
+                    <i class="fas fa-expand"></i> {{ t.bkRecipesTab }}
                 </button>
                 <button class="bk-mode-btn" :class="{ active: barkeeperTab === 'learn' }" @click="startLearnMode">
-                    <i class="fas fa-graduation-cap"></i> {{ t.bkLearnTab }}
+                    <i class="fas fa-expand"></i> {{ t.bkLearnTab }}
                 </button>
             </div>
 
-            <!-- BAR SELECTION ROW (Shown in Assistant Mode AND in Barkeeper Stock Mode) -->
+            <!-- BAR SELECTION ROW -->
             <div class="scroll-row" v-if="role === 'assistant' || (role === 'barkeeper' && barkeeperTab === 'stock')">
                 <button v-for="(bar, index) in activeBarsList" :key="bar.id" class="tab-btn" :class="{ active: currentBarIndex === index }" @click="switchBar(index)">{{ bar.name }}</button>
                 <button class="manage-btn" @click="openBarModal"><i class="fas fa-pen"></i></button>
             </div>
         </header>
 
-        <!-- CATEGORY FILTER BAR (Shown in Assistant Mode AND in Barkeeper Stock Mode) -->
+        <!-- CATEGORY FILTER BAR -->
         <div v-if="role === 'assistant' || (role === 'barkeeper' && barkeeperTab === 'stock')" class="filter-bar" style="background: var(--bg-color); padding: 10px 15px;">
             <div class="scroll-row">
                 <button class="manage-btn" :class="{ 'active-sort': sortMode }" @click="toggleSortMode" style="margin-right: 8px;">
@@ -651,7 +660,7 @@
     <!-- ========================================================= -->
     <!-- STOCK ITEM LIST (ASSISTANT OR BARKEEPER SPIRIT STOCK)      -->
     <!-- ========================================================= -->
-    <div class="item-list" v-if="role === 'assistant' || (role === 'barkeeper' && barkeeperTab === 'stock')">
+    <div class="item-list" v-show="!focusMode && (role === 'assistant' || (role === 'barkeeper' && barkeeperTab === 'stock'))">
         <template v-for="(groupItems, groupName) in displayedGroups" :key="'main-'+groupName">
             <div v-if="activeCategory === 'Alle' && groupItems.length > 0" class="group-header">
                 {{ groupName === 'Alle' ? t.all : (groupName === 'Sonstiges' ? t.other : groupName) }}
@@ -715,145 +724,171 @@
         </div>
     </div>
 
+
     <!-- ========================================================= -->
-    <!-- BARKEEPER TAB 2: REZEPTE NACHSCHAUEN (HORIZONTAL SWIPE)   -->
+    <!-- BARKEEPER FULLSCREEN MODE (RECIPES & LEARN)               -->
     <!-- ========================================================= -->
-    <div v-if="role === 'barkeeper' && barkeeperTab === 'recipes'" class="bk-section">
-        <div style="margin-bottom: 10px;">
-            <input type="text" v-model="recipeSearch" :placeholder="t.searchDrink" class="input-clean" style="width: 100%; box-sizing: border-box;">
+    <div v-if="role === 'barkeeper' && barkeeperTab !== 'stock'" class="focus-overlay-container" style="z-index: 900;">
+        
+        <!-- FULLSCREEN HEADER -->
+        <div style="position: sticky; top: 0; background: var(--bg-color); z-index: 910; padding: 15px 5px 10px 5px; margin: 0 -5px; border-bottom: 1px solid var(--input-bg); display: flex; align-items: center; gap: 10px;">
+            <div class="bk-mode-tabs" style="flex: 1; padding-bottom: 0; margin-left: 10px;">
+                <button class="bk-mode-btn" :class="{ active: barkeeperTab === 'recipes' }" @click="barkeeperTab = 'recipes'">
+                    <i class="fas fa-book-open"></i> {{ t.bkRecipesTab }}
+                </button>
+                <button class="bk-mode-btn" :class="{ active: barkeeperTab === 'learn' }" @click="startLearnMode">
+                    <i class="fas fa-graduation-cap"></i> {{ t.bkLearnTab }}
+                </button>
+            </div>
+            <button @click="barkeeperTab = 'stock'" class="header-icon-btn" style="background: var(--input-bg); margin-right: 10px; flex-shrink: 0;"><i class="fas fa-times"></i></button>
         </div>
 
-        <div class="scroll-row" style="padding-bottom: 6px;">
-            <button v-for="(drink, idx) in filteredRecipes" :key="drink.id" class="tab-btn" :class="{ active: activeRecipeIdx === idx }" @click="scrollToRecipe(idx)">
-                {{ drink.name }}
-            </button>
+        <!-- TAB 2: REZEPTE NACHSCHAUEN (HORIZONTAL SWIPE) -->
+        <div v-if="barkeeperTab === 'recipes'" class="bk-section">
+            <div style="margin-bottom: 10px;">
+                <input type="text" v-model="recipeSearch" :placeholder="t.searchDrink" class="input-clean" style="width: 100%; box-sizing: border-box;">
+            </div>
+
+            <div class="scroll-row" style="padding-bottom: 6px;">
+                <button v-for="(drink, idx) in filteredRecipes" :key="drink.id" class="tab-btn" :class="{ active: activeRecipeIdx === idx }" @click="scrollToRecipe(idx)">
+                    {{ drink.name }}
+                </button>
+            </div>
+
+            <div class="swipe-carousel" ref="recipeCarousel" @scroll.passive="onCarouselScroll">
+                <div v-for="(drink, idx) in filteredRecipes" :key="drink.id" class="recipe-swipe-card" :style="{ borderTopColor: drink.color }">
+                    <div>
+                        <div style="text-align:center;">
+                            <div class="recipe-title">{{ drink.name }}</div>
+                            <div class="recipe-badges">
+                                <div v-if="drink.alkoholfrei" class="drink-badge alkoholfrei-badge">{{ t.alkoholfrei }}</div>
+                                <div v-if="drink.shaken" class="drink-badge shaken-badge"><i class="fas fa-martini-glass"></i> Shaken</div>
+                            </div>
+                        </div>
+                        <ul class="ingredient-list">
+                            <li v-for="(ing, i) in drink.ingredients" :key="i">
+                                <span class="ing-num" :style="{ background: drink.color }">{{ i + 1 }}</span>
+                                <span>{{ ing }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div style="text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;">
+                        <i class="fas fa-arrows-left-right"></i> {{ idx + 1 }} / {{ filteredRecipes.length }} — {{ t.swipeHint }}
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="swipe-carousel" ref="recipeCarousel" @scroll.passive="onCarouselScroll">
-            <div v-for="(drink, idx) in filteredRecipes" :key="drink.id" class="recipe-swipe-card" :style="{ borderTopColor: drink.color }">
-                <div>
-                    <div style="text-align:center;">
-                        <div class="recipe-title">{{ drink.name }}</div>
-                        <div v-if="drink.alkoholfrei" class="alkoholfrei-badge">{{ t.alkoholfrei }}</div>
+        <!-- TAB 3: INTERAKTIVER LERNMODUS -->
+        <div v-if="barkeeperTab === 'learn'" class="bk-section">
+            <div v-if="currentLearnCard" class="learn-card">
+                <div class="learn-stats-bar">
+                    <span><i class="fas fa-layer-group"></i> {{ t.cardStat }}: <strong>✓ {{ getCardStat(currentLearnCard.id).correct }}</strong> | <strong>✗ {{ getCardStat(currentLearnCard.id).wrong }}</strong></span>
+                    <button @click="resetLearnStats" style="background:transparent; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem;">
+                        <i class="fas fa-rotate-left"></i> {{ t.resetStats }}
+                    </button>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 8px;">
+                    <div class="recipe-title">{{ currentLearnCard.name }}</div>
+                    <div class="recipe-badges">
+                        <div v-if="currentLearnCard.alkoholfrei" class="drink-badge alkoholfrei-badge">{{ t.alkoholfrei }}</div>
+                        <div v-if="currentLearnCard.shaken" class="drink-badge shaken-badge"><i class="fas fa-martini-glass"></i> Shaken</div>
+                    </div>
+                </div>
+
+                <!-- PHASE 1: 6 SEKUNDEN MERKEN -->
+                <template v-if="learnPhase === 'memorize'">
+                    <div style="text-align: center; font-size: 0.9rem; color: var(--accent); font-weight: 700;">
+                        <i class="fas fa-stopwatch"></i> {{ t.memorizePrompt }} ({{ Math.ceil(memorizeTimeLeft / 1000) }}s)
+                    </div>
+                    <div class="countdown-bar-wrap">
+                        <div class="countdown-bar-fill" :style="{ width: (memorizeTimeLeft / 6000 * 100) + '%' }"></div>
                     </div>
                     <ul class="ingredient-list">
-                        <li v-for="(ing, i) in drink.ingredients" :key="i">
-                            <span class="ing-num" :style="{ background: drink.color }">{{ i + 1 }}</span>
+                        <li v-for="(ing, i) in currentLearnCard.ingredients" :key="i">
+                            <span class="ing-num">{{ i + 1 }}</span>
                             <span>{{ ing }}</span>
                         </li>
                     </ul>
-                </div>
-                <div style="text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;">
-                    <i class="fas fa-arrows-left-right"></i> {{ idx + 1 }} / {{ filteredRecipes.length }} — {{ t.swipeHint }}
-                </div>
+                    <button class="action-btn-primary" @click="skipMemorize">
+                        <i class="fas fa-keyboard"></i> {{ t.startTypingNow }}
+                    </button>
+                </template>
+
+                <!-- PHASE 2: VERSCHWOMMEN & SELBER EINTRAGEN -->
+                <template v-else-if="learnPhase === 'input'">
+                    <div class="peek-zone" :class="{ 'peek-active': isPeeking }"
+                         @mousedown="isPeeking = true" @mouseup="isPeeking = false" @mouseleave="isPeeking = false"
+                         @touchstart.passive="isPeeking = true" @touchend="isPeeking = false" @touchcancel="isPeeking = false">
+                        <div class="blurred-solution">
+                            <div v-for="(ing, i) in currentLearnCard.ingredients" :key="i" style="padding: 3px 0; font-size: 0.9rem; font-weight: 600;">
+                                {{ i + 1 }}. {{ ing }}
+                            </div>
+                        </div>
+                        <div v-if="!isPeeking" class="peek-hint-overlay">
+                            <i class="fas fa-hand-pointer"></i> {{ t.holdToPeek }}
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div v-for="(ing, i) in currentLearnCard.ingredients" :key="i" class="learn-input-row">
+                            <span class="ing-num">{{ i + 1 }}</span>
+                            <!-- Amount Input (e.g. "4cl") -->
+                            <input type="text" class="learn-input" v-model="userAnswers[i].amt" :placeholder="t.amount" style="width: 65px; flex: none; text-align: center;" @keyup.enter="i === currentLearnCard.ingredients.length - 1 ? checkLearnAnswers() : null">
+                            <!-- Ingredient Name Input -->
+                            <input type="text" class="learn-input" style="flex: 1;" v-model="userAnswers[i].ing" :placeholder="t.ingredientPlaceholder" @keyup.enter="i === currentLearnCard.ingredients.length - 1 ? checkLearnAnswers() : null">
+                        </div>
+                    </div>
+
+                    <button class="action-btn-primary" @click="checkLearnAnswers">
+                        <i class="fas fa-check-double"></i> {{ t.checkAnswers }}
+                    </button>
+                </template>
+
+                <!-- PHASE 3: AUSWERTUNG & BEIDE SEITEN SICHTBAR -->
+                <template v-else-if="learnPhase === 'result'">
+                    <div style="text-align: center; margin: 10px 0; font-weight: 800; font-size: 1.15rem;" :style="{ color: lastRoundAllCorrect ? 'var(--success)' : 'var(--danger)' }">
+                        <i class="fas" :class="lastRoundAllCorrect ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+                        {{ lastRoundAllCorrect ? t.perfectResult : t.almostResult }}
+                    </div>
+
+                    <div class="compare-grid">
+                        <div class="compare-box">
+                            <h4>{{ t.yourInput }}</h4>
+                            <div v-for="(ing, i) in currentLearnCard.ingredients" :key="'u'+i" style="padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.15); font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas" :class="answerResults[i] ? 'fa-check' : 'fa-times'" :style="{ color: answerResults[i] ? 'var(--success)' : 'var(--danger)' }"></i>
+                                <span :style="{ textDecoration: answerResults[i] ? 'none' : 'line-through', opacity: (userAnswers[i].amt || userAnswers[i].ing) ? 1 : 0.5 }">
+                                    {{ i + 1 }}. {{ (userAnswers[i].amt + ' ' + userAnswers[i].ing).trim() || '—' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="compare-box">
+                            <h4>{{ t.solutionTitle }}</h4>
+                            <div v-for="(ing, i) in currentLearnCard.ingredients" :key="'s'+i" style="padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.15); font-size: 0.92rem; font-weight: 700;">
+                                {{ i + 1 }}. {{ ing }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button v-if="!lastRoundAllCorrect" class="action-btn-secondary" style="flex:1;" @click="overrideAsCorrect">
+                            <i class="fas fa-thumbs-up"></i> {{ t.markAsCorrect }}
+                        </button>
+                        <button class="action-btn-primary" style="flex:2; margin-top:0;" @click="nextLearnCard">
+                            {{ t.nextCard }} <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- BARKEEPER TAB 3: INTERAKTIVER LERNMODUS                   -->
-    <!-- ========================================================= -->
-    <div v-if="role === 'barkeeper' && barkeeperTab === 'learn'" class="bk-section">
-        <div v-if="currentLearnCard" class="learn-card">
-            <div class="learn-stats-bar">
-                <span><i class="fas fa-layer-group"></i> {{ t.cardStat }}: <strong>✓ {{ getCardStat(currentLearnCard.id).correct }}</strong> | <strong>✗ {{ getCardStat(currentLearnCard.id).wrong }}</strong></span>
-                <button @click="resetLearnStats" style="background:transparent; border:none; color:var(--text-secondary); cursor:pointer; font-size:0.8rem;">
-                    <i class="fas fa-rotate-left"></i> {{ t.resetStats }}
-                </button>
-            </div>
-
-            <div style="text-align: center; margin-bottom: 8px;">
-                <div class="recipe-title">{{ currentLearnCard.name }}</div>
-                <div v-if="currentLearnCard.alkoholfrei" class="alkoholfrei-badge">{{ t.alkoholfrei }}</div>
-            </div>
-
-            <!-- PHASE 1: 3 SEKUNDEN MERKEN -->
-            <template v-if="learnPhase === 'memorize'">
-                <div style="text-align: center; font-size: 0.9rem; color: var(--accent); font-weight: 700;">
-                    <i class="fas fa-stopwatch"></i> {{ t.memorizePrompt }} ({{ Math.ceil(memorizeTimeLeft / 1000) }}s)
-                </div>
-                <div class="countdown-bar-wrap">
-                    <div class="countdown-bar-fill" :style="{ width: (memorizeTimeLeft / 3000 * 100) + '%' }"></div>
-                </div>
-                <ul class="ingredient-list">
-                    <li v-for="(ing, i) in currentLearnCard.ingredients" :key="i">
-                        <span class="ing-num">{{ i + 1 }}</span>
-                        <span>{{ ing }}</span>
-                    </li>
-                </ul>
-                <button class="action-btn-primary" @click="skipMemorize">
-                    <i class="fas fa-keyboard"></i> {{ t.startTypingNow }}
-                </button>
-            </template>
-
-            <!-- PHASE 2: VERSCHWOMMEN & SELBER EINTRAGEN (+ GEDRÜCKT HALTEN ZUM SPICKEN) -->
-            <template v-else-if="learnPhase === 'input'">
-                <div class="peek-zone" :class="{ 'peek-active': isPeeking }"
-                     @mousedown="isPeeking = true" @mouseup="isPeeking = false" @mouseleave="isPeeking = false"
-                     @touchstart.passive="isPeeking = true" @touchend="isPeeking = false" @touchcancel="isPeeking = false">
-                    <div class="blurred-solution">
-                        <div v-for="(ing, i) in currentLearnCard.ingredients" :key="i" style="padding: 3px 0; font-size: 0.9rem; font-weight: 600;">
-                            {{ i + 1 }}. {{ ing }}
-                        </div>
-                    </div>
-                    <div v-if="!isPeeking" class="peek-hint-overlay">
-                        <i class="fas fa-hand-pointer"></i> {{ t.holdToPeek }}
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 12px;">
-                    <div v-for="(ing, i) in currentLearnCard.ingredients" :key="i" class="learn-input-row">
-                        <span class="ing-num">{{ i + 1 }}</span>
-                        <input type="text" class="learn-input" v-model="userAnswers[i]" :placeholder="t.ingredientPlaceholder + ' ' + (i + 1)" @keyup.enter="i === currentLearnCard.ingredients.length - 1 ? checkLearnAnswers() : null">
-                    </div>
-                </div>
-
-                <button class="action-btn-primary" @click="checkLearnAnswers">
-                    <i class="fas fa-check-double"></i> {{ t.checkAnswers }}
-                </button>
-            </template>
-
-            <!-- PHASE 3: AUSWERTUNG & BEIDE SEITEN SICHTBAR -->
-            <template v-else-if="learnPhase === 'result'">
-                <div style="text-align: center; margin: 10px 0; font-weight: 800; font-size: 1.15rem;" :style="{ color: lastRoundAllCorrect ? 'var(--success)' : 'var(--danger)' }">
-                    <i class="fas" :class="lastRoundAllCorrect ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
-                    {{ lastRoundAllCorrect ? t.perfectResult : t.almostResult }}
-                </div>
-
-                <div class="compare-grid">
-                    <div class="compare-box">
-                        <h4>{{ t.yourInput }}</h4>
-                        <div v-for="(ing, i) in currentLearnCard.ingredients" :key="'u'+i" style="padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.15); font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
-                            <i class="fas" :class="answerResults[i] ? 'fa-check' : 'fa-times'" :style="{ color: answerResults[i] ? 'var(--success)' : 'var(--danger)' }"></i>
-                            <span :style="{ textDecoration: answerResults[i] ? 'none' : 'line-through', opacity: userAnswers[i] ? 1 : 0.5 }">
-                                {{ i + 1 }}. {{ userAnswers[i] || '—' }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="compare-box">
-                        <h4>{{ t.solutionTitle }}</h4>
-                        <div v-for="(ing, i) in currentLearnCard.ingredients" :key="'s'+i" style="padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,0.15); font-size: 0.92rem; font-weight: 700;">
-                            {{ i + 1 }}. {{ ing }}
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                    <button v-if="!lastRoundAllCorrect" class="action-btn-secondary" style="flex:1;" @click="overrideAsCorrect">
-                        <i class="fas fa-thumbs-up"></i> {{ t.markAsCorrect }}
-                    </button>
-                    <button class="action-btn-primary" style="flex:2; margin-top:0;" @click="nextLearnCard">
-                        {{ t.nextCard }} <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </template>
-        </div>
-    </div>
 
     <!-- ========================================================= -->
-    <!-- FOCUS MODE OVERLAY (WORKS FOR ASSISTANT & BARKEEPER STOCK) -->
+    <!-- FOCUS MODE OVERLAY (STOCK FOCUS)                          -->
     <!-- ========================================================= -->
-    <div v-if="focusMode" class="focus-overlay-container">
+    <div v-if="focusMode && !(role === 'barkeeper' && barkeeperTab !== 'stock')" class="focus-overlay-container">
         <div class="scroll-row">
             <button class="manage-btn" :class="{ 'active-sort': sortMode }" @click="toggleSortMode" style="margin-right: 8px;">
                 <i class="fas fa-sort"></i>
@@ -918,13 +953,14 @@
         </div>
     </div>
 
-    <div v-if="focusMode" class="floating-btn-container">
+    <!-- FLOATING BACK BUTTON (FOR FOCUS MODE) -->
+    <div v-if="focusMode && !(role === 'barkeeper' && barkeeperTab !== 'stock')" class="floating-btn-container">
         <div class="float-btn" :class="{ 'active-fetch': clipboardMode }" @click="toggleClipboardMode"><i class="fas fa-clipboard-check"></i></div>
         <div class="float-btn" @click="exitFocusMode"><i class="fas fa-arrow-left"></i></div>
     </div>
 
     <!-- ADD PANEL (Shown in Assistant Mode AND in Barkeeper Stock Mode) -->
-    <div class="add-panel" v-if="role === 'assistant' || (role === 'barkeeper' && barkeeperTab === 'stock')">
+    <div class="add-panel" v-show="!focusMode && (role === 'assistant' || (role === 'barkeeper' && barkeeperTab === 'stock'))">
         <div style="display:flex; width:100%; gap:8px;">
             <input type="text" v-model="newItemName" :placeholder="t.drinkPlaceholder" class="input-clean">
             <select v-model="activeNewItemCat" class="input-select" style="width: 115px;">
@@ -973,7 +1009,7 @@
 
     const translations = {
         de: {
-            title: "Mia Stock", all: "Alle", other: "Sonstiges",
+            title: "Mia Hub", all: "Alle", other: "Sonstiges",
             assistant: "Assistent", barkeeper: "Barkeeper",
             bkStockTab: "Flaschen", bkRecipesTab: "Rezepte", bkLearnTab: "Lernmodus",
             searchDrink: "Getränk suchen...", alkoholfrei: "Alkoholfrei",
@@ -981,7 +1017,7 @@
             cardStat: "Statistik", resetStats: "Reset",
             memorizePrompt: "Zutaten einprägen!", startTypingNow: "Sofort eintragen",
             holdToPeek: "Gedrückt halten zum Spicken",
-            ingredientPlaceholder: "Zutat / Schritt", checkAnswers: "Überprüfen",
+            amount: "Menge", ingredientPlaceholder: "Zutat", checkAnswers: "Überprüfen",
             perfectResult: "Perfekt! Alles richtig!", almostResult: "Nicht ganz richtig – schau nochmal:",
             yourInput: "Deine Eingabe", solutionTitle: "Lösung",
             markAsCorrect: "War richtig (Tippfehler)", nextCard: "Nächste Karte",
@@ -994,7 +1030,7 @@
             close: "Schließen", sizesCategories: "Größen/Kategorien", newSize: "Neue Größe...", mainBar: "Haupttheke"
         },
         en: {
-            title: "Mia Stock", all: "All", other: "Other",
+            title: "Mia Hub", all: "All", other: "Other",
             assistant: "Assistant", barkeeper: "Bartender",
             bkStockTab: "Bottles", bkRecipesTab: "Recipes", bkLearnTab: "Learn Mode",
             searchDrink: "Search drink...", alkoholfrei: "Non-Alcoholic",
@@ -1002,7 +1038,7 @@
             cardStat: "Stats", resetStats: "Reset",
             memorizePrompt: "Memorize ingredients!", startTypingNow: "Type now",
             holdToPeek: "Hold card to peek",
-            ingredientPlaceholder: "Ingredient / Step", checkAnswers: "Check Answers",
+            amount: "Amount", ingredientPlaceholder: "Ingredient", checkAnswers: "Check Answers",
             perfectResult: "Perfect! All correct!", almostResult: "Not quite right – compare below:",
             yourInput: "Your Input", solutionTitle: "Solution",
             markAsCorrect: "Count as correct", nextCard: "Next Card",
@@ -1015,7 +1051,7 @@
             close: "Close", sizesCategories: "Sizes/Categories", newSize: "New Size...", mainBar: "Main Bar"
         },
         ar: {
-            title: "ميا ستوك", all: "الكل", other: "أخرى",
+            title: "ميا هوب", all: "الكل", other: "أخرى",
             assistant: "مساعد", barkeeper: "بارتندر",
             bkStockTab: "الزجاجات", bkRecipesTab: "الوصفات", bkLearnTab: "وضع التعلم",
             searchDrink: "ابحث عن مشروب...", alkoholfrei: "بدون كحول",
@@ -1023,7 +1059,7 @@
             cardStat: "إحصائيات", resetStats: "إعادة ضبط",
             memorizePrompt: "احفظ المكونات!", startTypingNow: "ابدأ الكتابة الآن",
             holdToPeek: "اضغط مطولاً لإظهار الحل",
-            ingredientPlaceholder: "المكون / الخطوة", checkAnswers: "تحقق",
+            amount: "الكمية", ingredientPlaceholder: "المكون", checkAnswers: "تحقق",
             perfectResult: "ممتاز! كل شيء صحيح!", almostResult: "ليس صحيحاً تماماً - قارن الحل:",
             yourInput: "إجابتك", solutionTitle: "الحل الصحيح",
             markAsCorrect: "اعتبرها صحيحة", nextCard: "البطاقة التالية",
@@ -1113,13 +1149,13 @@
     // =========================================================
     function getDefaultBarkeeperItems() {
         const barkeeperSpirits = [
-            { name: 'Mia Wodka', category: 'Spirituosen' },
+            { name: 'Mia Vodka', category: 'Spirituosen' },
             { name: 'Bacardi weiß', category: 'Spirituosen' },
             { name: 'Havanna', category: 'Spirituosen' },
             { name: 'Pitu', category: 'Spirituosen' },
             { name: 'Harpoon', category: 'Spirituosen' },
             { name: 'Gin', category: 'Spirituosen' },
-            { name: 'Blauer Gin', category: 'Spirituosen' },
+            { name: 'Bombay', category: 'Spirituosen' },
             { name: 'Tequila weiß', category: 'Spirituosen' },
             { name: 'Tequila braun', category: 'Spirituosen' },
             { name: 'Asbach', category: 'Spirituosen' },
@@ -1151,29 +1187,29 @@
     // ALLE 23 COCKTAIL-KARTEN & VARIATIONEN (MIA NIGHT CLUB):
     // =========================================================
     const COCKTAIL_CARDS = [
-        { id: 'c1', name: 'Prosecco Aperol', alkoholfrei: false, color: '#f5b041', ingredients: ['Orangenscheibe', '4cl Aperol', 'Prosecco', 'Wasser g.T.'] },
-        { id: 'c2', name: 'Aperol Sprizz', alkoholfrei: false, color: '#f5b041', ingredients: ['Orangenscheibe', '4cl Aperol', 'Prosecco', 'Wasser g.T.'] },
-        { id: 'c3', name: 'Apfelstrudel groß', alkoholfrei: false, color: '#eb984e', ingredients: ['4cl Malibu', 'Zimt', 'Apfelsaft'] },
-        { id: 'c4', name: 'Apfelstrudel klein', alkoholfrei: false, color: '#eb984e', ingredients: ['2cl Malibu', 'Zimt', 'Apfelsaft'] },
-        { id: 'c5', name: 'Caipirinha', alkoholfrei: false, color: '#ec7063', ingredients: ['6 Limetten', '2 Löffel Zucker', '2cl Lime Juice', 'Stößeln – Eis', '5cl Pitu', 'Umrühren – Eis'] },
-        { id: 'c6', name: 'Cubra Libre', alkoholfrei: false, color: '#cd6155', ingredients: ['2 Limetten', '4cl Havanna', 'Cola'] },
-        { id: 'c7', name: 'Gin Tonic', alkoholfrei: false, color: '#a569bd', ingredients: ['4cl blauer Gin', 'Tonic Water', 'Limette'] },
-        { id: 'c8', name: 'Long Island Iced Tea', alkoholfrei: false, color: '#5c6bc0', ingredients: ['2cl Wodka', '2cl weißer Tequila', '2cl Barcadi weiß', '2cl Gin', '1cl Zitronensaft', '1cl Orangensaft', 'Cola', '2 Limetten'] },
-        { id: 'c9', name: 'Solero', alkoholfrei: false, color: '#4fc3f7', ingredients: ['4cl Wodka', '2cl Vanillesirup', '1cl Zitrone', 'Orange & Maracuja shaken'] },
-        { id: 'c10', name: 'Touch Down', alkoholfrei: false, color: '#4db6ac', ingredients: ['4cl Wodka', '2cl Apricot Brandy', '1cl Grenadine', '1cl Zitrone', 'Orange & Maracuja shaken'] },
-        { id: 'c11', name: 'Sex on the Beach', alkoholfrei: false, color: '#4db6ac', ingredients: ['4cl Wodka', '2cl Peach Tree', '1cl Grenadine', '1cl Zitrone', 'Orange & Maracuja shaken'] },
-        { id: 'c12', name: 'Tequila Sunrise', alkoholfrei: false, color: '#66bb6a', ingredients: ['4cl weißer Tequila', 'Orangensaft', 'Grenadine (Glasrand)'] },
-        { id: 'c13', name: 'Zombie', alkoholfrei: false, color: '#9ccc65', ingredients: ['4cl weißer Barcadi', '2cl Kirschlikör', '1cl Grenadine', '1cl Zitrone', 'Orangensaft', 'shaken', '1–2cl Harpoon'] },
-        { id: 'c14', name: 'Moscow Mule', alkoholfrei: false, color: '#fbc02d', ingredients: ['4cl Wodka', '1cl Zitrone', 'Ginger Beer'] },
-        { id: 'c15', name: 'Munich Mule', alkoholfrei: false, color: '#fbc02d', ingredients: ['4cl blauer Gin', '1cl Zitrone', 'Ginger Beer'] },
-        { id: 'c16', name: 'Fruit Punch', alkoholfrei: true, color: '#ffa726', ingredients: ['2cl Zitrone', '2cl Grenadine', 'Orange & Maracuja', 'Shaken', 'Kirschsaft drüber'] },
-        { id: 'c17', name: 'Virgin Caipirinha', alkoholfrei: true, color: '#ffa726', ingredients: ['6 Limetten', '2 Löffel Zucker', '2cl Lime Juice', 'Stößeln – Eis', 'Ginger Ale', 'umrühren'] },
-        { id: 'c18', name: 'Fluschfinger groß', alkoholfrei: false, color: '#ff8a65', ingredients: ['4cl Erdbeerlimes', 'Fanta'] },
-        { id: 'c19', name: 'Fluschfinger klein', alkoholfrei: false, color: '#ff8a65', ingredients: ['2cl Erdbeerlimes', 'Fanta'] },
-        { id: 'c20', name: 'Rüscherl groß', alkoholfrei: false, color: '#e57373', ingredients: ['4cl Asbach', 'Cola'] },
-        { id: 'c21', name: 'Rüscherl klein', alkoholfrei: false, color: '#e57373', ingredients: ['2cl Asbach', 'Cola'] },
-        { id: 'c22', name: 'Wodka Limes', alkoholfrei: false, color: '#ba68c8', ingredients: ['2cl Wodka', '2cl Lime Juice'] },
-        { id: 'c23', name: 'B52', alkoholfrei: false, color: '#9575cd', ingredients: ['Kalua', 'Bailey\'s', 'Harpoon'] }
+        { id: 'c1', name: 'Prosecco Aperol', alkoholfrei: false, shaken: false, color: '#f5b041', ingredients: ['Orangenscheibe', '4cl Aperol', 'Prosecco', 'Wasser g.T.'] },
+        { id: 'c2', name: 'Aperol Sprizz', alkoholfrei: false, shaken: false, color: '#f5b041', ingredients: ['Orangenscheibe', '4cl Aperol', 'Prosecco', 'Wasser g.T.'] },
+        { id: 'c3', name: 'Apfelstrudel groß', alkoholfrei: false, shaken: false, color: '#eb984e', ingredients: ['4cl Malibu', 'Zimt', 'Apfelsaft'] },
+        { id: 'c4', name: 'Apfelstrudel klein', alkoholfrei: false, shaken: false, color: '#eb984e', ingredients: ['2cl Malibu', 'Zimt', 'Apfelsaft'] },
+        { id: 'c5', name: 'Caipirinha', alkoholfrei: false, shaken: false, color: '#ec7063', ingredients: ['6 Limetten', '2 Löffel Zucker', '2cl Lime Juice', 'Stößeln – Eis', '5cl Pitu', 'Umrühren – Eis'] },
+        { id: 'c6', name: 'Cubra Libre', alkoholfrei: false, shaken: false, color: '#cd6155', ingredients: ['2 Limetten', '4cl Havanna', 'Cola'] },
+        { id: 'c7', name: 'Gin Tonic', alkoholfrei: false, shaken: false, color: '#a569bd', ingredients: ['4cl Bombay', 'Tonic Water', 'Limette'] },
+        { id: 'c8', name: 'Long Island Iced Tea', alkoholfrei: false, shaken: false, color: '#5c6bc0', ingredients: ['2cl Vodka', '2cl weißer Tequila', '2cl Bacardi weiß', '2cl Gin', '1cl Zitronensaft', '1cl Orangensaft', 'Cola', '2 Limetten'] },
+        { id: 'c9', name: 'Solero', alkoholfrei: false, shaken: true, color: '#4fc3f7', ingredients: ['4cl Vodka', '2cl Vanillesirup', '1cl Zitrone', 'Orange & Maracuja shaken'] },
+        { id: 'c10', name: 'Touch Down', alkoholfrei: false, shaken: true, color: '#4db6ac', ingredients: ['4cl Vodka', '2cl Apricot Brandy', '1cl Grenadine', '1cl Zitrone', 'Orange & Maracuja shaken'] },
+        { id: 'c11', name: 'Sex on the Beach', alkoholfrei: false, shaken: true, color: '#4db6ac', ingredients: ['4cl Vodka', '2cl Peach Tree', '1cl Grenadine', '1cl Zitrone', 'Orange & Maracuja shaken'] },
+        { id: 'c12', name: 'Tequila Sunrise', alkoholfrei: false, shaken: false, color: '#66bb6a', ingredients: ['4cl weißer Tequila', 'Orangensaft', 'Grenadine (Glasrand)'] },
+        { id: 'c13', name: 'Zombie', alkoholfrei: false, shaken: true, color: '#9ccc65', ingredients: ['4cl weißer Bacardi', '2cl Kirschlikör', '1cl Grenadine', '1cl Zitrone', 'Orangensaft', 'shaken', '1–2cl Harpoon'] },
+        { id: 'c14', name: 'Moscow Mule', alkoholfrei: false, shaken: false, color: '#fbc02d', ingredients: ['4cl Vodka', '1cl Zitrone', 'Ginger Beer'] },
+        { id: 'c15', name: 'Munich Mule', alkoholfrei: false, shaken: false, color: '#fbc02d', ingredients: ['4cl Bombay', '1cl Zitrone', 'Ginger Beer'] },
+        { id: 'c16', name: 'Fruit Punch', alkoholfrei: true, shaken: true, color: '#ffa726', ingredients: ['2cl Zitrone', '2cl Grenadine', 'Orange & Maracuja', 'Shaken', 'Kirschsaft drüber'] },
+        { id: 'c17', name: 'Virgin Caipirinha', alkoholfrei: true, shaken: false, color: '#ffa726', ingredients: ['6 Limetten', '2 Löffel Zucker', '2cl Lime Juice', 'Stößeln – Eis', 'Ginger Ale', 'umrühren'] },
+        { id: 'c18', name: 'Fluschfinger groß', alkoholfrei: false, shaken: false, color: '#ff8a65', ingredients: ['4cl Erdbeerlimes', 'Fanta'] },
+        { id: 'c19', name: 'Fluschfinger klein', alkoholfrei: false, shaken: false, color: '#ff8a65', ingredients: ['2cl Erdbeerlimes', 'Fanta'] },
+        { id: 'c20', name: 'Rüscherl groß', alkoholfrei: false, shaken: false, color: '#e57373', ingredients: ['4cl Asbach', 'Cola'] },
+        { id: 'c21', name: 'Rüscherl klein', alkoholfrei: false, shaken: false, color: '#e57373', ingredients: ['2cl Asbach', 'Cola'] },
+        { id: 'c22', name: 'Vodka Limes', alkoholfrei: false, shaken: false, color: '#ba68c8', ingredients: ['2cl Vodka', '2cl Lime Juice'] },
+        { id: 'c23', name: 'B52', alkoholfrei: false, shaken: false, color: '#9575cd', ingredients: ['Kalua', 'Bailey\'s', 'Harpoon'] }
     ];
 
     const { createApp, nextTick } = Vue;
@@ -1189,14 +1225,14 @@
                 modals: { bar: false, cat: false },
                 resetBarMode: false, deleteBarConfirm: false, deleteModeId: null,
                 
-                // Assistenten-Daten (Original)
+                // Assistenten-Daten
                 currentCategory: 'Alle',
                 categories: ['Alle', '0.2L', '0.25L', '0.33L', '0.5L', '0.75L', '1.0L'],
                 newItemName: '', newItemCat: '0.33L', newBarName: '', newCatName: '',
                 activeBarIndex: 0,
                 bars: [{ id: 'b1', name: 'Bar 1', items: [] }, { id: 'b2', name: 'Bar 2', items: [] }],
                 
-                // Barkeeper-Flaschen-Daten (Neu)
+                // Barkeeper-Flaschen-Daten
                 currentBkCategory: 'Alle',
                 bkCategories: ['Alle', 'Spirituosen', 'Liköre & Limes', 'Sirup & Extras'],
                 newBkItemCat: 'Spirituosen',
@@ -1210,10 +1246,10 @@
                 learnStats: {}, // { [cardId]: { correct: 0, wrong: 0 } }
                 currentLearnCard: null,
                 learnPhase: 'memorize', // 'memorize' | 'input' | 'result'
-                memorizeTimeLeft: 3000,
+                memorizeTimeLeft: 6000,
                 memorizeTimer: null,
                 isPeeking: false,
-                userAnswers: [],
+                userAnswers: [], // Array of { amt: '', ing: '' }
                 answerResults: [],
                 lastRoundAllCorrect: false,
 
@@ -1370,11 +1406,11 @@
             nextLearnCard() {
                 if (this.memorizeTimer) clearInterval(this.memorizeTimer);
                 this.currentLearnCard = this.pickWeightedCard();
-                this.userAnswers = this.currentLearnCard.ingredients.map(() => '');
+                this.userAnswers = this.currentLearnCard.ingredients.map(() => ({ amt: '', ing: '' }));
                 this.answerResults = [];
                 this.isPeeking = false;
                 this.learnPhase = 'memorize';
-                this.memorizeTimeLeft = 3000;
+                this.memorizeTimeLeft = 6000;
 
                 this.memorizeTimer = setInterval(() => {
                     this.memorizeTimeLeft -= 100;
@@ -1399,6 +1435,7 @@
                     .replace(/barcadi/g, 'bacardi')
                     .replace(/kahlua|kalua|kahlúa/g, 'kalua')
                     .replace(/baileys|bailey's/g, 'baileys')
+                    .replace(/wodka/g, 'vodka')
                     .replace(/[-–—.,']/g, ' ')
                     .replace(/\s+/g, '')
                     .trim();
@@ -1406,7 +1443,8 @@
             checkLearnAnswers() {
                 const expected = this.currentLearnCard.ingredients;
                 this.answerResults = expected.map((exp, idx) => {
-                    const uNorm = this.normalizeIngredient(this.userAnswers[idx]);
+                    const combinedUser = this.userAnswers[idx].amt + ' ' + this.userAnswers[idx].ing;
+                    const uNorm = this.normalizeIngredient(combinedUser);
                     const eNorm = this.normalizeIngredient(exp);
                     if (!uNorm) return false;
                     return uNorm === eNorm;
